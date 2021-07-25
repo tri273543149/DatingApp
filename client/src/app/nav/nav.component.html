@@ -20,6 +20,11 @@
           >
         </li>
       </ng-container>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/errors" routerLinkActive="active"
+          >Errors</a
+        >
+      </li>
     </ul>
 
     <div
@@ -27,7 +32,10 @@
       *ngIf="accountService.currenUser$ | async as user"
       dropdown
     >
-      <a style="text-decoration: none;" class="dropdown-toggle text-light" dropdownToggle
+      <a
+        style="text-decoration: none"
+        class="dropdown-toggle text-light"
+        dropdownToggle
         >Welcome {{ user.username | titlecase }}</a
       >
       <div class="dropdown-menu mt-3" *dropdownMenu>
