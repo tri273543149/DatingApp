@@ -49,10 +49,10 @@ export class PhotoEditorComponent implements OnInit {
     });
   }
 
-  deletePhoto(photoId: number){
+  deletePhoto(photoId: number) {
     this.memberService.deletePhoto(photoId).subscribe(() => {
-      this.member.photos = this.member.photos.filter(x => x.id !== photoId);
-    })
+      this.member.photos = this.member.photos.filter((x) => x.id !== photoId);
+    });
   }
 
   initializeUploader() {
@@ -72,8 +72,13 @@ export class PhotoEditorComponent implements OnInit {
 
     this.uploader.onSuccessItem = (item, res, status, headers) => {
       if (res) {
-        const photo = JSON.parse(res);
+        const photo: Photo = JSON.parse(res);
         this.member.photos.push(photo);
+        if (photo.isMain) {
+          this.user.photoUrl = photo.url;
+          this.member.photoUrl = photo.url;
+          this.accountService.setCurrentUser(this.user);
+        }
       }
     };
   }
