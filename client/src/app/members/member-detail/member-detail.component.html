@@ -16,12 +16,12 @@
           <p>{{ member.age }}</p>
         </div>
         <div>
-          <strong>Member since:</strong>
-          <p>{{ member.created }}</p>
+          <strong>Last active:</strong>
+          <p>{{ member.lastActive | timeago }}</p>
         </div>
         <div>
-          <strong>Last active:</strong>
-          <p>{{ member.lastActive }}</p>
+          <strong>Member since:</strong>
+          <p>{{ member.created | date: 'longDate' }}</p>
         </div>
       </div>
       <div class="card-footer">
@@ -49,7 +49,7 @@
           [options]="galleryOptions"
           [images]="galleryImages"
           class="ngx-gallery"
-          style="display: inline-block; margin-bottom: 20px;"
+          style="display: inline-block; margin-bottom: 20px"
         ></ngx-gallery>
       </tab>
       <tab heading="Messages">

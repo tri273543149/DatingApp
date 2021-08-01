@@ -12,6 +12,7 @@ using AutoMapper;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using API.Extensions;
+using API.Helpers;
 
 namespace API.Controllers
 {
@@ -30,9 +31,17 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers([FromQuery]UserParams userParams)
         {
-            var users = await _userRepo.GetMembersAsync();
+            var user = await _userRepo.GetUserByUsernameAsync(User.GetUsername());
+            userParams.CurrentUsername = user.UserName;
+            
+            if(string.IsNullOrEmpty(userParams.Gender)){
+                userParams.Gender = user.Gender == "male" ? "female" : "male";
+            }
+            var users = await _userRepo.GetMembersAsync(userParams);
+            Response.AddPaginationHeader(users.CurrentPage, users.PageSize, users.TotalCount, users.TotalPages);
+
             return Ok(users);
         }
 
@@ -90,40 +99,43 @@ namespace API.Controllers
         }
 
         [HttpPut("set-main-photo/{photoId}")]
-        public async Task<ActionResult> SetMainPhoto(int photoId){
+        public async Task<ActionResult> SetMainPhoto(int photoId)
+        {
             var user = await _userRepo.GetUserByUsernameAsync(User.GetUsername());
 
             var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
-            
-            if(photo.IsMain) return BadRequest("This is already your main photo");
+
+            if (photo.IsMain) return BadRequest("This is already your main photo");
 
             var currentMain = user.Photos.FirstOrDefault(x => x.IsMain);
 
-            if(currentMain != null) currentMain.IsMain = false;
+            if (currentMain != null) currentMain.IsMain = false;
             photo.IsMain = true;
 
-            if(await _userRepo.SaveAllAsync()) return NoContent();
+            if (await _userRepo.SaveAllAsync()) return NoContent();
             return BadRequest("failed to set main photo");
         }
 
         [HttpDelete("delete-photo/{photoId}")]
-        public async Task<ActionResult> DeletePhoto(int photoId){
+        public async Task<ActionResult> DeletePhoto(int photoId)
+        {
             var user = await _userRepo.GetUserByUsernameAsync(User.GetUsername());
 
             var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
 
-            if(photo == null) return NotFound();
+            if (photo == null) return NotFound();
 
-            if(photo.IsMain) return BadRequest("You cannot delete your main photo");
+            if (photo.IsMain) return BadRequest("You cannot delete your main photo");
 
-            if(photo.PublicId != null){
+            if (photo.PublicId != null)
+            {
                 var result = await _photoService.DeletePhotoAsync(photo.PublicId);
-                if(result.Error != null) return BadRequest(result.Error.Message);
+                if (result.Error != null) return BadRequest(result.Error.Message);
             }
 
             user.Photos.Remove(photo);
 
-            if(await _userRepo.SaveAllAsync()) return Ok();
+            if (await _userRepo.SaveAllAsync()) return Ok();
             return BadRequest("Failed to delete the photo");
         }
     }
