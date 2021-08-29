@@ -23,7 +23,7 @@
         <button
           class="btn btn-primary"
           routerLink="/members/{{ member.username }}"
-          [queryParams]="{tab: 3}"
+          [queryParams]="{ tab: 3 }"
         >
           <i class="fa fa-envelope"></i>
         </button>
@@ -32,7 +32,14 @@
   </div>
   <div class="card-body" style="padding: 10px">
     <h6 class="card-title text-center" style="margin-bottom: 5px">
-      <i class="fa fa-user" style="margin-right: 4px"></i>
+      <span
+        [class.is-online]="
+          (presence.onlineUsers$ | async).includes(member.username)
+        "
+      >
+        <i class="fa fa-user" style="margin-right: 4px"></i>
+      </span>
+
       {{ member.knownAs }}, {{ member.age }}
     </h6>
     <p class="card-text text-muted text-center">
